@@ -44,5 +44,5 @@ jobs:
         run: |
           echo "📦 Lecture d’un secret sous secret/data/ci/test"
           curl -s --header "X-Vault-Token: $VAULT_TOKEN" \
-               $VAULT_ADDR/v1/secret/data/ci/test | jq
+               $VAULT_ADDR/v1/secret/data/secret/ci/github2 | jq
 
