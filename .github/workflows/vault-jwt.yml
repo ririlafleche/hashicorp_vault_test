@@ -1,0 +1,48 @@
+name: Vault JWT Local CI
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write   # nécessaire pour OIDC
+  contents: read
+
+jobs:
+  vault-test:
+    runs-on: self-hosted
+    env:
+      VAULT_ADDR: http://localhost:8200
+      VAULT_ROLE: ci
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Retrieve GitHub OIDC token
+        id: oidc
+        run: |
+          echo "🔑 Récupération du token OIDC..."
+          OIDC_TOKEN=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+                             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://github.com/${{ github.repository }}" \
+                             | jq -r '.value')
+          echo "::add-mask::$OIDC_TOKEN"
+          echo "OIDC_TOKEN=$OIDC_TOKEN" >> $GITHUB_ENV
+
+      - name: Authenticate to Vault with JWT
+        id: vault-login
+        run: |
+          echo "🚪 Authentification auprès de Vault..."
+          RESPONSE=$(curl -s --request POST \
+            --data "{\"jwt\": \"$OIDC_TOKEN\", \"role\": \"$VAULT_ROLE\"}" \
+            $VAULT_ADDR/v1/auth/jwt/login)
+          echo $RESPONSE | jq
+          VAULT_TOKEN=$(echo $RESPONSE | jq -r '.auth.client_token')
+          echo "::add-mask::$VAULT_TOKEN"
+          echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
+
+      - name: Retrieve secret from Vault
+        run: |
+          echo "📦 Lecture d’un secret sous secret/data/ci/test"
+          curl -s --header "X-Vault-Token: $VAULT_TOKEN" \
+               $VAULT_ADDR/v1/secret/data/ci/test | jq
+

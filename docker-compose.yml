@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault_prod
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./config:/vault/config
+      - ./data:/vault/data
+    command: vault server -config=/vault/config/vault.hcl
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+ 

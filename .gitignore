@@ -1,0 +1,22 @@
+# Ignorer le stockage interne de Vault
+data/
+vault-data/
+vault/file/
+
+# Ignorer les fichiers d'état, PID, logs, etc.
+*.log
+*.pid
+*.tmp
+*.swp
+
+# Ignorer Docker et runners
+docker-compose.override.yml
+.env
+.env.local
+
+# Ignorer tout ce qui est spécifique à ton runner ou système
+actions-runner/
+node_modules/
+venv/
+__pycache__/
+
