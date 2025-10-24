@@ -42,7 +42,7 @@ jobs:
 
       - name: Retrieve secret from Vault
         run: |
-          echo "📦 Lecture d’un secret sous secret/data/ci/test"
+          echo "📦 Lecture d’un secret sous secret/data/ci/"
           curl -s --header "X-Vault-Token: $VAULT_TOKEN" \
-               $VAULT_ADDR/v1/secret/data/secret/ci/github2 | jq
+                $VAULT_ADDR/v1/secret/data/ci/github2 | jq
 
